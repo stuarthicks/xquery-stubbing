@@ -20,7 +20,7 @@ xquery-stubbing is available in maven-central! The latest stable release is:
 <dependency>
   <groupId>me.stuarthicks</groupId>
   <artifactId>xquery-stubbing</artifactId>
-  <version>1.0.0</version>
+  <version>1.1</version>
 </dependency>
 ```
 
