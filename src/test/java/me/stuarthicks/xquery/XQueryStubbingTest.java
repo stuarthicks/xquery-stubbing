@@ -92,7 +92,6 @@ public class XQueryStubbingTest {
         String result = this.xq.evaluateXQueryFile("/hello_thrice.xqy").getUnderlyingValue().toString().trim();
 
         assertEquals("(\"A\", \"B\", \"B\")", result);
-
     }
 
     @Test
@@ -106,7 +105,6 @@ public class XQueryStubbingTest {
         String result = this.xq.callXQueryFunction("/hello_in_lib_function.xqy", NAMESPACE, "hi", null).head().getStringValue();
 
         assertEquals("Hello World!", result);
-
     }
 
     private XQueryFunctionStubBuilder helloStubber () {
