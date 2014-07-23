@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>XQuery-Stubbing by stuarthicks</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/stuarthicks/xquery-stubbing">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/stuarthicks/xquery-stubbing/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/stuarthicks/xquery-stubbing/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>XQuery-Stubbing</h1>
+          <p>A first attempt at making XQuery code testable using JUnit</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/stuarthicks">stuarthicks</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>
+<a name="xquery-stubbing" class="anchor" href="#xquery-stubbing"><span class="octicon octicon-link"></span></a>xquery-stubbing</h1>
+
+<p>License: Apache License, Version 2.0: <a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+
+<h2>
+<a name="what-is-this" class="anchor" href="#what-is-this"><span class="octicon octicon-link"></span></a>What is this?</h2>
+
+<p>A way to run <a href="http://www.w3.org/XML/Query/">XQuery</a> within a Java app using <a href="http://saxon.sourceforge.net/">Saxon</a>, and to provide stub methods to stand-in for external functions that aren't present (such as the XQuery extensions provided by <a href="http://www.marklogic.com/">MarkLogic</a>).</p>
+
+<h2>
+<a name="why" class="anchor" href="#why"><span class="octicon octicon-link"></span></a>Why?</h2>
+
+<p>Primarily for testing purposes. My use-case is to write tests for XQuery intended to be deployed on a MarkLogic application server. All current ways I can find of testing MarkLogic XQuery involve running a MarkLogic instance somewhere and deploying to there to run tests. NO THANKS. I want simple unit tests I can run locally without any fancy setup. As my XQuery is designed to complement a larger Java component, being able to keep the two together and have the XQuery tested with the Java is convenient.</p>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<h3>
+<a name="maven-dependency" class="anchor" href="#maven-dependency"><span class="octicon octicon-link"></span></a>Maven dependency</h3>
+
+<p>xquery-stubbing is available in maven-central! The latest stable release is:</p>
+
+<div class="highlight highlight-xml"><pre><span class="nt">&lt;dependency&gt;</span>
+  <span class="nt">&lt;groupId&gt;</span>me.stuarthicks<span class="nt">&lt;/groupId&gt;</span>
+  <span class="nt">&lt;artifactId&gt;</span>xquery-stubbing<span class="nt">&lt;/artifactId&gt;</span>
+  <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</pre></div>
+
+<h3>
+<a name="stubbing-example" class="anchor" href="#stubbing-example"><span class="octicon octicon-link"></span></a>Stubbing Example</h3>
+
+<p>See the tests for more examples, but put simply, use the provided builder to stub your functions. Optionally you can maintain a reference to each stubbed function and after executing your XQuery you can inspect the function to see what parameters it was called with and how many times it was called. Useful for asserts in unit tests.</p>
+
+<p>Let's take this example XQuery document <code>hello_with_arg.xqy</code>:</p>
+
+<div class="highlight highlight-xquery"><pre><span class="k">declare</span> <span class="k">namespace</span> <span class="nn">example</span> <span class="o">=</span> <span class="s2">"http://example/"</span><span class="p">;</span>
+<span class="nf">example:hello</span><span class="p">(</span><span class="s2">"World!"</span><span class="p">)</span>
+</pre></div>
+
+<p>We can stub the hello method, evaluate the document, and inspect the results with the following technique:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@Test</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">itShouldMockSingleStringArgFunctionReturningString</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">XQueryException</span> <span class="o">{</span>
+  <span class="n">XQueryContext</span> <span class="n">xq</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">XQueryContext</span><span class="o">();</span>
+  <span class="n">XQueryFunctionStub</span> <span class="n">hello</span> <span class="o">=</span> <span class="n">xq</span><span class="o">.</span><span class="na">buildXQueryFunctionStub</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">withNamespaceURI</span><span class="o">(</span><span class="s">"http://example/"</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">withPrefix</span><span class="o">(</span><span class="s">"example"</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">withFunctionName</span><span class="o">(</span><span class="s">"hello"</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">withFunctionSignature</span><span class="o">(</span><span class="n">XQueryConstants</span><span class="o">.</span><span class="na">ARGUMENTS_SINGLE_STRING</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">withReturnType</span><span class="o">(</span><span class="n">XQueryConstants</span><span class="o">.</span><span class="na">RETURNS_SINGLE_STRING</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">withReturnValue</span><span class="o">(</span><span class="k">new</span> <span class="nf">StringValue</span><span class="o">(</span><span class="s">"Hello World!"</span><span class="o">))</span>
+    <span class="o">.</span><span class="na">done</span><span class="o">();</span>
+
+  <span class="n">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">xq</span><span class="o">.</span><span class="na">evaluateXQueryFile</span><span class="o">(</span><span class="s">"/hello_with_arg.xqy"</span><span class="o">).</span><span class="na">toString</span><span class="o">();</span>
+
+  <span class="n">assertEquals</span><span class="o">(</span><span class="s">"World!"</span><span class="o">,</span> <span class="n">hello</span><span class="o">.</span><span class="na">getArguments</span><span class="o">().</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="na">toString</span><span class="o">());</span>
+  <span class="n">assertEquals</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">hello</span><span class="o">.</span><span class="na">getNumberOfInvocations</span><span class="o">());</span>
+
+  <span class="n">assertEquals</span><span class="o">(</span><span class="s">"Hello World!"</span><span class="o">,</span> <span class="n">result</span><span class="o">);</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>Methods stubbed via the XQueryContext are automatically registered and will be present in the next call to <code>evaluateXQueryFile()</code>. There is no provided way to delete stubs, simply throw away the context and create a new one (or create the context in your before method).</p>
+
+<p>Also worth noting, calling withReturnValue multiple times in the builder causes each one to be remembered and played back by the stub function in order (with the last one repeated if the stub is called additional times). This is intended to match the behaviour you see in mockito.</p>
+
+<h2>
+<a name="limitations" class="anchor" href="#limitations"><span class="octicon octicon-link"></span></a>Limitations</h2>
+
+<p>URI Resolvers have been implemented to allow document operations and imports to work normally (suggestion: use multiple <code>at</code> hints), but they aren't extensively tested. Please report any issues you have with those functions.</p>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
